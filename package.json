@@ -1,0 +1,11 @@
+{
+  "name": "ai-literacy-platform",
+  "version": "1.0.0",
+  "description": "An interactive AI literacy platform for kids and seniors",
+  "scripts": {
+    "dev": "vercel dev"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
