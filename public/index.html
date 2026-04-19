@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Literacy — Learn AI Your Way</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #ffffff; --bg2: #f7f7f5; --bg3: #f0efe9;
+      --text: #1a1a1a; --text2: #555550; --text3: #999990;
+      --border: rgba(0,0,0,0.12); --border2: rgba(0,0,0,0.22);
+      --green: #1D9E75; --green-bg: #E1F5EE; --green-text: #085041;
+      --red-bg: #FAECE7; --red-text: #4A1B0C; --red-border: #D85A30;
+      --radius: 8px; --radius-lg: 12px;
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg3); color: var(--text); font-size: 16px; line-height: 1.7; min-height: 100vh; }
+    .screen { display: none; } .screen.active { display: block; }
+
+    /* LANDING */
+    .landing { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; text-align: center; }
+    .landing-badge { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); margin-bottom: 1rem; }
+    .landing h1 { font-size: 36px; font-weight: 500; margin-bottom: 0.5rem; }
+    .landing .sub { font-size: 17px; color: var(--text2); margin-bottom: 2.5rem; }
+    .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 520px; width: 100%; margin-bottom: 2rem; }
+    .mode-card { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.75rem 1.5rem; cursor: pointer; text-align: left; transition: border-color 0.15s, transform 0.1s; }
+    .mode-card:hover { border-color: var(--border2); transform: translateY(-1px); }
+    .mode-icon { font-size: 26px; margin-bottom: 0.75rem; display: block; }
+    .mode-card h2 { font-size: 17px; font-weight: 500; margin-bottom: 0.3rem; }
+    .mode-card p { font-size: 13px; color: var(--text2); line-height: 1.5; }
+    .landing-footer { font-size: 12px; color: var(--text3); }
+
+    /* APP SHELL */
+    .app-shell { display: grid; grid-template-columns: 210px 1fr; min-height: 100vh; }
+    .sidebar { background: var(--bg2); border-right: 0.5px solid var(--border); padding: 1.5rem 1rem; display: flex; flex-direction: column; }
+    .sidebar-logo { font-size: 14px; font-weight: 500; margin-bottom: 2px; }
+    .sidebar-mode { font-size: 12px; color: var(--text3); margin-bottom: 1.5rem; }
+    .nav-section-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text3); margin-bottom: 6px; }
+    .nav-item { display: flex; align-items: center; gap: 9px; padding: 7px 10px; border-radius: var(--radius); cursor: pointer; font-size: 13px; color: var(--text2); margin-bottom: 2px; transition: background 0.1s; }
+    .nav-item:hover { background: var(--bg); }
+    .nav-item.active { background: var(--bg); color: var(--text); font-weight: 500; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border2); flex-shrink: 0; transition: background 0.2s; }
+    .nav-item.done .dot { background: var(--green); }
+    .sidebar-back { margin-top: auto; font-size: 12px; color: var(--text3); cursor: pointer; padding: 6px 0; }
+    .sidebar-back:hover { color: var(--text2); }
+
+    /* MAIN */
+    .main { padding: 2rem 2.5rem; max-width: 720px; }
+    .tab-bar { display: flex; gap: 2px; border-bottom: 0.5px solid var(--border); margin-bottom: 1.75rem; }
+    .tab { font-size: 13px; padding: 8px 14px; cursor: pointer; color: var(--text2); border-bottom: 2px solid transparent; margin-bottom: -0.5px; transition: color 0.1s; }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--text); border-bottom-color: var(--text); font-weight: 500; }
+    .tab-panel { display: none; } .tab-panel.active { display: block; }
+
+    /* LESSON */
+    .progress-bar { height: 3px; background: var(--border); border-radius: 2px; margin-bottom: 1.5rem; }
+    .progress-fill { height: 100%; background: var(--text); border-radius: 2px; transition: width 0.4s; }
+    .lesson-meta { font-size: 12px; color: var(--text3); margin-bottom: 0.4rem; }
+    .lesson-title { font-size: 22px; font-weight: 500; margin-bottom: 1rem; }
+    .lesson-body { font-size: 15px; color: var(--text2); line-height: 1.8; margin-bottom: 1.5rem; }
+    .concept-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; margin-bottom: 1.5rem; }
+    .concept-card { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 1rem; }
+    .concept-card h4 { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+    .concept-card p { font-size: 12px; color: var(--text2); line-height: 1.5; }
+    .lesson-actions { display: flex; gap: 10px; }
+
+    /* TUTOR */
+    .chat-wrap { border: 0.5px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; background: var(--bg); }
+    .chat-header { padding: 12px 16px; border-bottom: 0.5px solid var(--border); font-size: 13px; font-weight: 500; background: var(--bg2); }
+    .chat-messages { padding: 1rem; min-height: 280px; max-height: 320px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+    .msg { max-width: 82%; }
+    .msg.user { align-self: flex-end; }
+    .msg.assistant { align-self: flex-start; }
+    .msg-name { font-size: 11px; color: var(--text3); margin-bottom: 3px; }
+    .msg-bubble { padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.6; }
+    .msg.user .msg-bubble { background: var(--text); color: var(--bg); border-radius: 14px 14px 4px 14px; }
+    .msg.assistant .msg-bubble { background: var(--bg2); color: var(--text); border: 0.5px solid var(--border); border-radius: 14px 14px 14px 4px; }
+    .chat-footer { border-top: 0.5px solid var(--border); background: var(--bg2); }
+    .chat-input-row { display: flex; gap: 8px; padding: 10px 12px; }
+    .chat-input-row input { flex: 1; font-size: 14px; padding: 8px 12px; border-radius: var(--radius); border: 0.5px solid var(--border); background: var(--bg); color: var(--text); outline: none; }
+    .chat-input-row input:focus { border-color: var(--border2); }
+    .send-btn { padding: 8px 16px; font-size: 13px; border-radius: var(--radius); border: 0.5px solid var(--border2); background: transparent; color: var(--text); cursor: pointer; }
+    .send-btn:hover { background: var(--bg3); }
+    .chat-notice { font-size: 11px; color: var(--text3); text-align: center; padding: 6px 12px 10px; }
+    .typing { display: flex; gap: 4px; align-items: center; }
+    .typing span { width: 6px; height: 6px; border-radius: 50%; background: var(--text3); animation: blink 1.2s infinite; }
+    .typing span:nth-child(2) { animation-delay: 0.2s; }
+    .typing span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes blink { 0%,80%,100%{opacity:0.3}40%{opacity:1} }
+
+    /* QUIZ */
+    .quiz-q { font-size: 17px; font-weight: 500; margin-bottom: 1.25rem; line-height: 1.5; }
+    .quiz-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1.5rem; }
+    .quiz-opt { padding: 12px 16px; border: 0.5px solid var(--border); border-radius: var(--radius); font-size: 14px; color: var(--text2); cursor: pointer; transition: background 0.1s, border-color 0.1s; }
+    .quiz-opt:hover:not(.correct):not(.wrong) { background: var(--bg2); border-color: var(--border2); }
+    .quiz-opt.correct { border-color: var(--green); color: var(--green-text); background: var(--green-bg); }
+    .quiz-opt.wrong { border-color: var(--red-border); color: var(--red-text); background: var(--red-bg); }
+    .quiz-feedback { font-size: 14px; line-height: 1.7; color: var(--text2); padding: 14px 16px; background: var(--bg2); border-radius: var(--radius); border: 0.5px solid var(--border); margin-bottom: 1.25rem; }
+    .complete-banner { background: var(--green-bg); border: 0.5px solid var(--green); border-radius: var(--radius); padding: 12px 16px; font-size: 14px; color: var(--green-text); margin-bottom: 1.25rem; }
+
+    /* BUTTONS */
+    button { font-family: inherit; cursor: pointer; }
+    .btn { padding: 9px 18px; font-size: 13px; border-radius: var(--radius); border: 0.5px solid var(--border2); background: transparent; color: var(--text); transition: background 0.1s; }
+    .btn:hover { background: var(--bg2); }
+    .btn-primary { background: var(--text); color: var(--bg); border-color: var(--text); }
+    .btn-primary:hover { opacity: 0.85; background: var(--text); }
+
+    @media (max-width: 640px) {
+      .app-shell { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .main { padding: 1.25rem; }
+      .concept-grid { grid-template-columns: 1fr; }
+      .mode-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="screen-landing" class="screen active">
+  <div class="landing">
+    <p class="landing-badge">AI Literacy Initiative</p>
+    <h1>Learn AI. Your way.</h1>
+    <p class="sub">Friendly, interactive lessons for every age.<br>No experience needed.</p>
+    <div class="mode-grid">
+      <div class="mode-card" onclick="enterMode('kids')">
+        <span class="mode-icon">🎒</span>
+        <h2>For kids</h2>
+        <p>Simple explanations, activities, and an AI tutor to explore how AI works.</p>
+      </div>
+      <div class="mode-card" onclick="enterMode('seniors')">
+        <span class="mode-icon">📖</span>
+        <h2>For seniors</h2>
+        <p>Clear, calm lessons to understand AI in everyday life — at your own pace.</p>
+      </div>
+    </div>
+    <p class="landing-footer">Built by the AI Education Initiative · 1,000+ learners reached</p>
+  </div>
+</div>
+
+<div id="screen-app" class="screen">
+  <div class="app-shell">
+    <div class="sidebar">
+      <div class="sidebar-logo">AI Literacy</div>
+      <div class="sidebar-mode" id="sidebar-mode"></div>
+      <div class="nav-section-label">Lessons</div>
+      <div id="nav-list"></div>
+      <div class="sidebar-back" onclick="goBack()">← Change mode</div>
+    </div>
+    <div class="main">
+      <div class="tab-bar">
+        <div class="tab active" data-tab="lesson" onclick="switchTab('lesson',this)">Lesson</div>
+        <div class="tab" data-tab="tutor" onclick="switchTab('tutor',this)">AI Tutor</div>
+        <div class="tab" data-tab="quiz" onclick="switchTab('quiz',this)">Quiz</div>
+      </div>
+      <div id="panel-lesson" class="tab-panel active"></div>
+      <div id="panel-tutor" class="tab-panel">
+        <div class="chat-wrap">
+          <div class="chat-header" id="chat-header">AI Tutor</div>
+          <div class="chat-messages" id="chat-messages"></div>
+          <div class="chat-footer">
+            <div class="chat-input-row">
+              <input type="text" id="chat-input" placeholder="Ask anything about this lesson…" onkeydown="if(event.key==='Enter')sendChat()" />
+              <button class="send-btn" onclick="sendChat()">Send</button>
+            </div>
+            <p class="chat-notice">Powered by Claude · Your questions stay private</p>
+          </div>
+        </div>
+      </div>
+      <div id="panel-quiz" class="tab-panel"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const lessons = {
+  kids: [
+    { title: "What is AI?", duration: "5 min",
+      body: "AI stands for Artificial Intelligence. It's software that can learn from examples — kind of like how you learned what a cat looks like by seeing lots of cats. AI does the same thing, but with data and at incredible speed.",
+      concepts: [{ title: "AI learns from examples", desc: "Show it thousands of cat photos and it learns what a cat looks like." }, { title: "It's not magic", desc: "AI follows rules humans wrote — it just does it very, very fast." }, { title: "AI is everywhere", desc: "Video recommendations, voice assistants, and spell-check all use AI." }],
+      quiz: { q: "How does AI learn to recognize a cat?", options: ["It looks it up in a dictionary","It sees thousands of cat photos","It asks a human every time","It guesses randomly"], answer: 1, feedback: "Correct! AI learns by seeing lots and lots of examples. The more examples it sees, the better it gets." }
+    },
+    { title: "AI in everyday life", duration: "5 min",
+      body: "AI is already part of your daily life — you just might not notice it! From the music app that recommends your next song, to the game that adjusts its difficulty for you, AI is quietly helping out everywhere.",
+      concepts: [{ title: "Recommendations", desc: "YouTube, Spotify, and Netflix use AI to suggest what you might enjoy." }, { title: "Voice assistants", desc: "Siri, Alexa, and Google Assistant use AI to understand your voice." }, { title: "Smart filters", desc: "Email spam filters use AI to stop junk mail reaching your inbox." }],
+      quiz: { q: "Which of these uses AI?", options: ["A regular light switch","A book recommendation on Amazon","A printed newspaper","A wooden chair"], answer: 1, feedback: "Right! Amazon uses AI to analyze what you've browsed and suggests things you might enjoy." }
+    },
+    { title: "AI safety & ethics", duration: "6 min",
+      body: "AI is a powerful tool — and like any tool, it matters how it's used. AI can make mistakes, reflect unfair biases, or be used in harmful ways. That's why humans need to stay in charge and keep asking: is this fair? Is this safe?",
+      concepts: [{ title: "AI can be wrong", desc: "AI makes mistakes, especially with things it's never seen before." }, { title: "Bias in AI", desc: "If AI is trained on unfair data, it can make unfair decisions." }, { title: "Humans stay in charge", desc: "Important decisions — like medical ones — need human judgment too." }],
+      quiz: { q: "Why is it important for humans to oversee AI?", options: ["Because AI is too slow","Because AI can make mistakes or be biased","Because AI doesn't have electricity","Because AI is too expensive"], answer: 1, feedback: "Exactly! AI can reflect biases in its training data and make mistakes. Human oversight helps catch and correct those errors." }
+    },
+    { title: "Prompt engineering", duration: "5 min",
+      body: "When you talk to an AI like ChatGPT, the words you use matter a lot. A 'prompt' is what you type to the AI. The better your prompt, the better the answer — it's almost like a superpower!",
+      concepts: [{ title: "Be specific", desc: "'Write a 3-sentence poem about space for a 10-year-old' beats 'write a poem'." }, { title: "Give context", desc: "Tell the AI who you are or what you need it for." }, { title: "Iterate", desc: "If the first answer isn't great, refine your prompt and try again." }],
+      quiz: { q: "Which is a better AI prompt?", options: ["Tell me stuff","Explain how rainbows form in simple terms for a 10-year-old","Rainbow","Can you help"], answer: 1, feedback: "Great choice! The more specific and clear your prompt, the more useful the AI's response will be." }
+    }
+  ],
+  seniors: [
+    { title: "What is AI?", duration: "6 min",
+      body: "Artificial Intelligence — or AI — is software that can learn and make decisions. Think of it like a very fast, well-trained assistant that has read millions of books. It doesn't think like a human, but it can recognize patterns and give helpful responses.",
+      concepts: [{ title: "Pattern recognition", desc: "AI finds patterns in large amounts of data — like recognizing your voice." }, { title: "Not a robot", desc: "Most AI is invisible software running on computers and phones." }, { title: "Learning from data", desc: "AI improves by processing enormous amounts of examples during training." }],
+      quiz: { q: "What best describes how AI works?", options: ["It thinks exactly like a human brain","It finds patterns in large amounts of data","It randomly guesses answers","It looks things up in an encyclopedia"], answer: 1, feedback: "Well done! AI works by identifying patterns in large datasets. It's not true intelligence, but it can be remarkably useful." }
+    },
+    { title: "AI in everyday life", duration: "6 min",
+      body: "You may already be using AI without realizing it. Many everyday technologies now rely on AI — from your smartphone to your email. Understanding where it appears helps you use it confidently.",
+      concepts: [{ title: "Voice assistants", desc: "Siri and Alexa use AI to understand spoken language and answer questions." }, { title: "Medical imaging", desc: "AI helps doctors detect conditions in X-rays more accurately." }, { title: "Fraud detection", desc: "Your bank uses AI to flag unusual transactions and protect your account." }],
+      quiz: { q: "Which technology commonly uses AI?", options: ["A traditional telephone","Email spam filters","A printed map","A wristwatch"], answer: 1, feedback: "Correct! Email spam filters use AI to learn what junk mail looks like and block it automatically." }
+    },
+    { title: "Staying safe online", duration: "7 min",
+      body: "As AI becomes more common, it's also being misused. Scammers use AI to create convincing fake messages, voice calls, and videos. Knowing the warning signs keeps you safe.",
+      concepts: [{ title: "AI-generated scams", desc: "Scammers use AI to write convincing emails pretending to be your bank." }, { title: "Deepfakes", desc: "AI can generate realistic fake videos or voices — always verify urgent requests." }, { title: "Your best defense", desc: "Slow down, verify the source, and call a trusted person if something feels off." }],
+      quiz: { q: "You get an urgent voice message from your 'grandchild' asking for money. What do you do?", options: ["Send the money immediately","Hang up and call them on their known number","Ignore all future calls","Reply with your bank details"], answer: 1, feedback: "Exactly right. AI can clone voices convincingly. Always verify by calling back on a number you already know." }
+    },
+    { title: "Using AI tools wisely", duration: "6 min",
+      body: "AI tools like ChatGPT can be genuinely helpful — for writing letters, answering questions, or summarizing articles. But they can also be wrong. Treat AI like a knowledgeable friend: useful, but worth double-checking for important matters.",
+      concepts: [{ title: "AI can make things up", desc: "AI sometimes generates false information confidently — always verify medical or legal advice." }, { title: "Protect your privacy", desc: "Don't share sensitive personal information with AI chatbots." }, { title: "Great for drafts", desc: "AI is excellent for writing first drafts of letters and emails — then you edit." }],
+      quiz: { q: "You ask an AI about a medication and it sounds very confident. What's the right next step?", options: ["Follow the advice immediately","Verify with your pharmacist or doctor","Assume AI is always correct","Ignore the answer entirely"], answer: 1, feedback: "Exactly. AI can sound authoritative while being wrong. For health, legal, or financial questions, always confirm with a professional." }
+    }
+  ]
+};
+
+let mode = 'kids', lessonIdx = 0, done = new Set(), chatHistory = [], activeTab = 'lesson', quizAnswered = false;
+
+function enterMode(m) {
+  mode = m; lessonIdx = 0; done = new Set(); chatHistory = [];
+  document.getElementById('sidebar-mode').textContent = m === 'kids' ? 'Kids mode' : 'Seniors mode';
+  document.getElementById('screen-landing').classList.remove('active');
+  document.getElementById('screen-app').classList.add('active');
+  renderNav(); renderLesson(); renderTutorWelcome(); renderQuiz();
+  switchTab('lesson', document.querySelector('.tab'));
+}
+
+function goBack() {
+  document.getElementById('screen-app').classList.remove('active');
+  document.getElementById('screen-landing').classList.add('active');
+}
+
+function renderNav() {
+  document.getElementById('nav-list').innerHTML = lessons[mode].map((l,i) => `
+    <div class="nav-item ${i===lessonIdx?'active':''} ${done.has(i)?'done':''}" onclick="goToLesson(${i})">
+      <span class="dot"></span><span>${l.title}</span>
+    </div>`).join('');
+}
+
+function goToLesson(i) {
+  lessonIdx = i; chatHistory = []; quizAnswered = false;
+  renderNav(); renderLesson(); renderTutorWelcome(); renderQuiz();
+  switchTab('lesson', document.querySelector('.tab'));
+}
+
+function renderLesson() {
+  const l = lessons[mode][lessonIdx], total = lessons[mode].length;
+  const pct = (lessonIdx / total * 100).toFixed(0);
+  document.getElementById('panel-lesson').innerHTML = `
+    <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    <p class="lesson-meta">Lesson ${lessonIdx+1} of ${total} · ${l.duration}</p>
+    <h2 class="lesson-title">${l.title}</h2>
+    <p class="lesson-body">${l.body}</p>
+    <div class="concept-grid">${l.concepts.map(c=>`<div class="concept-card"><h4>${c.title}</h4><p>${c.desc}</p></div>`).join('')}</div>
+    <div class="lesson-actions">
+      ${lessonIdx>0?`<button class="btn" onclick="goToLesson(${lessonIdx-1})">← Previous</button>`:''}
+      <button class="btn btn-primary" onclick="switchTab('quiz',document.querySelectorAll('.tab')[2])">Take the quiz →</button>
+    </div>`;
+}
+
+function renderTutorWelcome() {
+  const l = lessons[mode][lessonIdx];
+  const isKids = mode === 'kids';
+  chatHistory = [];
+  const msgs = document.getElementById('chat-messages');
+  msgs.innerHTML = '';
+  const welcome = isKids
+    ? `Hi! I'm your AI tutor 👋 You're learning about "${l.title}". Ask me anything — no question is too simple!`
+    : `Hello! I'm your AI tutor for today's lesson on "${l.title}". Please feel free to ask me anything — I'm here to help at your pace.`;
+  document.getElementById('chat-header').textContent = `AI Tutor — ${l.title}`;
+  appendMsg('assistant', 'AI Tutor', welcome);
+}
+
+function appendMsg(role, name, text) {
+  const msgs = document.getElementById('chat-messages');
+  const d = document.createElement('div');
+  d.className = `msg ${role}`;
+  d.innerHTML = `<div class="msg-name">${name}</div><div class="msg-bubble">${text}</div>`;
+  msgs.appendChild(d);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function showTyping() {
+  const msgs = document.getElementById('chat-messages');
+  const d = document.createElement('div');
+  d.className = 'msg assistant'; d.id = 'typing-ind';
+  d.innerHTML = `<div class="msg-name">AI Tutor</div><div class="msg-bubble"><div class="typing"><span></span><span></span><span></span></div></div>`;
+  msgs.appendChild(d); msgs.scrollTop = msgs.scrollHeight;
+}
+
+async function sendChat() {
+  const inp = document.getElementById('chat-input');
+  const text = inp.value.trim(); if (!text) return;
+  inp.value = ''; appendMsg('user','You',text);
+  chatHistory.push({role:'user',content:text});
+  showTyping();
+  const l = lessons[mode][lessonIdx];
+  const isKids = mode === 'kids';
+  const system = isKids
+    ? `You are a friendly, encouraging AI tutor for children aged 8-14. Current lesson: "${l.title}". Keep answers to 2-4 sentences, use simple words, be enthusiastic. Context: ${l.body}`
+    : `You are a patient, clear AI tutor for senior citizens. Current lesson: "${l.title}". Speak respectfully, avoid jargon, use relatable examples, keep answers concise. Context: ${l.body}`;
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({system, messages: chatHistory})
+    });
+    const data = await res.json();
+    document.getElementById('typing-ind')?.remove();
+    const reply = data.reply || "Sorry, I couldn't get a response. Please try again.";
+    chatHistory.push({role:'assistant',content:reply});
+    appendMsg('assistant','AI Tutor',reply);
+  } catch(e) {
+    document.getElementById('typing-ind')?.remove();
+    appendMsg('assistant','AI Tutor','There was a connection error. Please try again in a moment.');
+  }
+}
+
+function renderQuiz(answered=false, selected=null) {
+  const l = lessons[mode][lessonIdx], q = l.quiz;
+  document.getElementById('panel-quiz').innerHTML = `
+    ${answered && selected===q.answer ? `<div class="complete-banner">✓ Correct! Lesson complete.</div>` : ''}
+    <p class="quiz-q">${q.q}</p>
+    <div class="quiz-options">
+      ${q.options.map((opt,i)=>{
+        let cls='quiz-opt';
+        if(answered){ if(i===q.answer) cls+=' correct'; else if(i===selected) cls+=' wrong'; }
+        return `<div class="${cls}" ${!answered?`onclick="answerQuiz(${i})"`:''}>${opt}</div>`;
+      }).join('')}
+    </div>
+    ${answered?`<div class="quiz-feedback">${q.feedback}</div>
+    <div style="display:flex;gap:10px;">
+      ${lessonIdx < lessons[mode].length-1
+        ? `<button class="btn btn-primary" onclick="goToLesson(${lessonIdx+1})">Next lesson →</button>`
+        : `<button class="btn btn-primary" onclick="goBack()">🎉 All done!</button>`}
+    </div>`:''}`;
+}
+
+function answerQuiz(i) {
+  if(quizAnswered) return; quizAnswered = true;
+  if(i === lessons[mode][lessonIdx].quiz.answer) done.add(lessonIdx);
+  renderNav(); renderQuiz(true, i);
+}
+
+function switchTab(tab, el) {
+  activeTab = tab;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  if(el) el.classList.add('active');
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById(`panel-${tab}`).classList.add('active');
+}
+</script>
+</body>
+</html>
